@@ -81,7 +81,7 @@ address, so each roll came from a fresh wallet.
 
 The first roll landed on **Gryffindor** — id `1`, precisely the outcome the original
 contract could not report. Before the fix it would have stored `0` and `house()` would
-have reverted with `"Dice not rolled"` forever.
+have reverted with `"Dice not rolled"` until that wallet rolled again.
 
 The second and third rolls both drew Hufflepuff from different addresses — a 1-in-4
 repeat, and a useful check in its own right: identical results stored against separate
@@ -113,8 +113,9 @@ while `s_results` uses `0` as its "never rolled" sentinel — the default value 
 unwritten mapping entry. Gryffindor is therefore indistinguishable from not having
 rolled at all, which breaks two guards:
 
-- `house()` reverts with `"Dice not rolled"` for a player who actually rolled
-  Gryffindor, permanently — the result is already stored, so it can never be re-read.
+- `house()` reverts with `"Dice not rolled"` for a player who rolled Gryffindor. The
+  result is stored but can never be read, and the revert lasts until the player rolls
+  again.
 - `rollDice()` gates on `s_results[msg.sender] == 0`, so that same player passes the
   "Already rolled" check and can roll again, overwriting their result.
 
